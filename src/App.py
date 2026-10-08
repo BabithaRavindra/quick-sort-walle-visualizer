@@ -43,10 +43,12 @@ def build_interactive_html(base_dir: str) -> str:
     alg_js_path = os.path.join(base_dir, "components", "AlgorithmPanel", "AlgorithmPanel.js")
     comp_js_path = os.path.join(base_dir, "components", "ComplexityPanel", "ComplexityPanel.js")
     concepts_js_path = os.path.join(base_dir, "components", "ConceptsPanel", "ConceptsPanel.js")
+    walle_theme_js_path = os.path.join(base_dir, "theme", "walleTheme.js")
     app_react_js_path = os.path.join(base_dir, "App.js")
 
     app_css = load_file(css_path) if os.path.exists(css_path) else ""
     react_engine_js = load_file(react_engine_path) if os.path.exists(react_engine_path) else ""
+    walle_theme_js = clean_for_inlining(load_file(walle_theme_js_path)) if os.path.exists(walle_theme_js_path) else ""
     quick_sort_js = clean_for_inlining(load_file(quick_sort_js_path)) if os.path.exists(quick_sort_js_path) else ""
     examples_js = clean_for_inlining(load_file(examples_js_path)) if os.path.exists(examples_js_path) else ""
     array_vis_js = clean_for_inlining(load_file(array_vis_js_path)) if os.path.exists(array_vis_js_path) else ""
@@ -64,7 +66,7 @@ def build_interactive_html(base_dir: str) -> str:
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quick Sort Visualizer - DAA CIA 3(B)</title>
+  <title>Quick Sort Visualizer - WALL•E Edition</title>
   <style>
     {app_css}
     
@@ -74,7 +76,7 @@ def build_interactive_html(base_dir: str) -> str:
       min-height: 100%;
       margin: 0;
       padding: 0;
-      background-color: var(--color-bg-app, #F8FAFC);
+      background-color: var(--chassis-bg, #14110E);
     }}
   </style>
 </head>
@@ -85,6 +87,7 @@ def build_interactive_html(base_dir: str) -> str:
   <!-- React 18 Engine & Modular Components -->
   <script>
     {react_engine_js}
+    {walle_theme_js}
     {quick_sort_js}
     {examples_js}
     {array_vis_js}

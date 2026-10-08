@@ -24,6 +24,28 @@
     const [inputValue, setInputValue] = useState(defaultArray.join(", "));
     const [errorMessage, setErrorMessage] = useState("");
     const [isLearningModalOpen, setIsLearningModalOpen] = useState(false);
+    const [soundEnabled, setSoundEnabled] = useState(false);
+    const [crtEnabled, setCrtEnabled] = useState(false);
+
+    const currentStep = steps[currentStepIndex - 1] || steps[0];
+    const isComplete = currentStep && currentStep.type === "SORT_COMPLETE" && currentStepIndex === steps.length;
+
+    // Procedural sound effects on step transitions
+    useEffect(() => {
+      if (!currentStep) return;
+      const sm = global.WalleTheme && global.WalleTheme.soundManager;
+      if (!sm || !soundEnabled) return;
+
+      if (currentStep.type === "COMPARE") {
+        sm.playScannerPing();
+      } else if (currentStep.type === "SWAP" || currentStep.type === "SWAP_PIVOT") {
+        sm.playCompactorClank();
+      } else if (currentStep.type === "PIVOT_PLACED" || currentStep.type === "SORT_COMPLETE") {
+        sm.playCompletionChime();
+      } else {
+        sm.playServoClick();
+      }
+    }, [currentStepIndex, soundEnabled]);
 
     // Playback loop effect
     useEffect(() => {
@@ -129,12 +151,17 @@
       setCurrentStepIndex(1);
     }
 
-    const currentStep = steps[currentStepIndex - 1] || steps[0];
-    const isComplete = currentStep && currentStep.type === "SORT_COMPLETE" && currentStepIndex === steps.length;
+    function handleToggleSound() {
+      const sm = global.WalleTheme && global.WalleTheme.soundManager;
+      if (sm) {
+        const active = sm.toggleSound();
+        setSoundEnabled(active);
+      }
+    }
 
     return h(
       "div",
-      { className: "app-container" },
+      { className: `app-container ${crtEnabled ? "crt-mode" : ""}` },
 
       // 1. Header Component (WALL-E Themed)
       h(Header, { onOpenLearning: () => setIsLearningModalOpen(true) }),
@@ -150,6 +177,10 @@
         pivotsSelected: currentStep ? currentStep.pivotsSelected : 0,
         inputValue,
         errorMessage,
+        soundEnabled,
+        crtEnabled,
+        onToggleSound: handleToggleSound,
+        onToggleCrt: () => setCrtEnabled((c) => !c),
         onInputChange: (val) => setInputValue(val),
         onGenerate: () => handleGenerateArray(inputValue),
         onRandom: handleRandomArray,

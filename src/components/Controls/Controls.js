@@ -1,10 +1,10 @@
 /**
- * Controls Component
+ * Controls Component — WALL•E Compactor Console & Solar Charge Gauge
  * Provides:
- * 1. Array Input Controls (Custom Input, Generate, Random, Load Example, Presets)
- * 2. Playback Navigation (Start, Next Step, Prev Step, Play/Pause, Reset)
- * 3. Speed Selection (Slow, Normal, Fast)
- * 4. Step Scrubber & Counters
+ * 1. Scrap Pile Input Controls & Story-Themed Presets
+ * 2. Compactor Navigation (Start, Next Step, Prev Step, Play/Pause, Reset)
+ * 3. Solar Charging Meter with 10 Segmented LED Battery Cells
+ * 4. Sound & CRT Scanlines HUD Toggles
  */
 
 export function renderControls(state) {
@@ -17,26 +17,38 @@ export function renderControls(state) {
     swaps,
     pivotsSelected,
     inputValue,
-    errorMessage
+    errorMessage,
+    soundEnabled = false,
+    crtEnabled = false
   } = state;
+
+  const chargePercent = Math.round((currentStepIndex / Math.max(totalSteps, 1)) * 100);
+  const totalCells = 10;
+  const activeCells = Math.round((chargePercent / 100) * totalCells);
+  let batteryCellsHtml = "";
+  for (let c = 1; c <= totalCells; c++) {
+    const isLit = c <= activeCells;
+    const isHigh = c > 7;
+    batteryCellsHtml += `<span class="battery-cell ${isLit ? (isHigh ? 'cell-green' : 'cell-yellow') : 'cell-dim'}"></span>`;
+  }
 
   return `
     <div class="controls-component">
-      <!-- Input Section -->
+      <!-- Scrap Pile Input Panel -->
       <div class="input-panel-card">
         <div class="input-panel-header">
           <div class="input-title">
-            <span class="input-icon">⚙️</span>
-            <strong>Array Configuration</strong>
+            <span class="input-icon">📦</span>
+            <strong>Scrap Pile Configuration</strong>
             <span class="input-limit-hint">(3 to 15 numbers, comma-separated)</span>
           </div>
           <div class="input-presets-group">
-            <span class="preset-label">Quick Presets:</span>
-            <button class="btn-preset" data-preset="standard">CIA Example</button>
-            <button class="btn-preset" data-preset="reverse">Worst (Reverse)</button>
-            <button class="btn-preset" data-preset="sorted">Worst (Sorted)</button>
-            <button class="btn-preset" data-preset="duplicates">Duplicates</button>
-            <button class="btn-preset" data-preset="single">Single (42)</button>
+            <span class="preset-label">Presets:</span>
+            <button class="btn-preset" data-preset="standard">Standard Pile</button>
+            <button class="btn-preset" data-preset="reverse">Reverse Scrap</button>
+            <button class="btn-preset" data-preset="sorted">Sorted Tower</button>
+            <button class="btn-preset" data-preset="duplicates">Duplicate Scrap</button>
+            <button class="btn-preset" data-preset="single">Single Plant (42)</button>
           </div>
         </div>
 
@@ -52,18 +64,18 @@ export function renderControls(state) {
             ${errorMessage ? `<div class="input-error-msg">⚠️ ${errorMessage}</div>` : ''}
           </div>
           <button id="btnGenerate" class="btn btn-primary">
-            <span>⚡</span> Generate Array
+            <span>⚡</span> Compact Scrap (Generate)
           </button>
           <button id="btnRandom" class="btn btn-secondary">
-            <span>🎲</span> Generate Random Array
+            <span>🎲</span> Random Debris
           </button>
           <button id="btnExample" class="btn btn-outline">
-            <span>📖</span> Load Example
+            <span>📖</span> Load CIA Example
           </button>
         </div>
       </div>
 
-      <!-- Playback & Scrubber Controls -->
+      <!-- Playback Console & Solar Charging Gauge -->
       <div class="playback-panel-card">
         <div class="playback-top-row">
           <!-- Step Actions -->
@@ -81,14 +93,19 @@ export function renderControls(state) {
             <button id="btnNext" class="btn-ctrl btn-ctrl-primary" ${currentStepIndex >= totalSteps ? 'disabled' : ''} title="Execute next algorithm step">
               <span class="ctrl-text">Next Step</span> <span class="ctrl-icon">▶</span>
             </button>
-            <button id="btnReset" class="btn-ctrl btn-ctrl-reset" title="Reset to initial array">
+            <button id="btnReset" class="btn-ctrl btn-ctrl-reset" title="Reset to initial scrap pile">
               <span class="ctrl-icon">↺</span> Reset
             </button>
           </div>
 
-          <!-- Speed Controls -->
+          <!-- Speed & Sensory Toggles -->
           <div class="speed-control-group">
-            <span class="speed-label">Playback Speed:</span>
+            <button id="btnSoundToggle" class="btn-feature-toggle ${soundEnabled ? 'active' : ''}" title="Toggle procedural sound effects">
+              <span>${soundEnabled ? '🔊 Sound: ON' : '🔇 Sound: OFF'}</span>
+            </button>
+            <button id="btnCrtToggle" class="btn-feature-toggle ${crtEnabled ? 'active' : ''}" title="Toggle Axiom CRT HUD scanlines">
+              <span>${crtEnabled ? '📺 CRT: ON' : '📺 CRT: OFF'}</span>
+            </button>
             <div class="speed-buttons">
               <button class="btn-speed ${speed === 1600 ? 'active' : ''}" data-speed="1600">Slow (1.6s)</button>
               <button class="btn-speed ${speed === 900 ? 'active' : ''}" data-speed="900">Normal (0.9s)</button>
@@ -97,11 +114,23 @@ export function renderControls(state) {
           </div>
         </div>
 
-        <!-- Scrubber and Counters -->
+        <!-- Solar Battery Gauge Scrubber and Telemetry Counters -->
         <div class="playback-scrubber-row">
+          <div class="solar-gauge-container">
+            <div class="solar-gauge-header">
+              <span class="solar-icon">☀️</span>
+              <span class="solar-title">SOLAR CHARGE:</span>
+              <span class="solar-pct">${chargePercent}%</span>
+            </div>
+            <div class="solar-led-bar">
+              ${batteryCellsHtml}
+            </div>
+          </div>
+
           <div class="step-counter-badge">
             Step <strong>${currentStepIndex}</strong> of <strong>${totalSteps}</strong>
           </div>
+
           <div class="slider-wrapper">
             <input 
               type="range" 
@@ -112,9 +141,10 @@ export function renderControls(state) {
               value="${currentStepIndex}"
             />
           </div>
+
           <div class="metrics-tags-row">
             <div class="metric-tag" title="Total element comparisons with pivot">
-              <span class="metric-label">Comparisons:</span>
+              <span class="metric-label">EVE Scans:</span>
               <span class="metric-num">${comparisons}</span>
             </div>
             <div class="metric-tag" title="Total element swaps performed">
@@ -122,7 +152,7 @@ export function renderControls(state) {
               <span class="metric-num">${swaps}</span>
             </div>
             <div class="metric-tag" title="Total pivots chosen">
-              <span class="metric-label">Pivots Selected:</span>
+              <span class="metric-label">Directives:</span>
               <span class="metric-num">${pivotsSelected}</span>
             </div>
           </div>

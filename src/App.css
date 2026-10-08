@@ -67,8 +67,8 @@
   --radius-lg: 10px;
   --radius-full: 9999px;
 
-  --font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "Consolas", "SFMono-Regular", "Liberation Mono", Menlo, Courier, monospace;
+  --cursor-walle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28' fill='none'%3E%3Cpath d='M4 4 L14 14 L11 17 L2 8 Z' fill='%23F59E0B' stroke='%2378350F' stroke-width='1.5'/%3E%3Cpath d='M14 14 L18 10 L22 14 L18 18 Z' fill='%23B45309' stroke='%23451A03' stroke-width='1.5'/%3E%3Ccircle cx='4' cy='4' r='2.5' fill='%23EF4444'/%3E%3C/svg%3E") 4 4, auto;
+  --cursor-eve: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28' fill='none'%3E%3Cpolygon points='2,2 10,22 14,14 22,10' fill='%2300E5FF' stroke='%230284C7' stroke-width='1.5'/%3E%3Ccircle cx='14' cy='14' r='3' fill='%23FFFFFF'/%3E%3C/svg%3E") 2 2, pointer;
 }
 
 * {
@@ -87,6 +87,11 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  cursor: var(--cursor-walle);
+}
+
+button, a, input, select, .btn, .btn-preset, .btn-ctrl, .viva-question, .step-slider {
+  cursor: var(--cursor-eve) !important;
 }
 
 .app-container {
@@ -539,6 +544,63 @@ body {
   border-top: 1px solid var(--chassis-border);
 }
 
+.solar-gauge-container {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: var(--chassis-card-subtle);
+  border: 1px solid var(--walle-yellow-dark);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  min-width: 140px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.solar-gauge-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--walle-yellow-bright);
+}
+
+.solar-pct {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  color: #FFFFFF;
+}
+
+.solar-led-bar {
+  display: flex;
+  gap: 3px;
+  height: 8px;
+}
+
+.battery-cell {
+  flex: 1;
+  height: 100%;
+  border-radius: 1px;
+  transition: all 0.2s ease;
+}
+
+.cell-dim {
+  background-color: #2D2319;
+  border: 1px solid #3F3224;
+}
+
+.cell-yellow {
+  background-color: #F59E0B;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.8);
+  border: 1px solid #FCD34D;
+}
+
+.cell-green {
+  background-color: #22C55E;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.9);
+  border: 1px solid #86EFAC;
+}
+
 .step-counter-badge {
   font-size: 12px;
   font-family: var(--font-mono);
@@ -950,9 +1012,154 @@ body {
   color: var(--plant-green-bright);
 }
 
+/* Character Sprite Anchors & Animations */
+.sprite-anchor {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 3px;
+}
+
+.walle-anchor .sprite-walle {
+  animation: walleRoll 1.6s ease-in-out infinite alternate;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+}
+
+@keyframes walleRoll {
+  0% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-3px) rotate(1.5deg); }
+  100% { transform: translateY(0) rotate(-1deg); }
+}
+
+.eve-anchor .sprite-eve {
+  animation: eveHover 2.2s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px var(--eve-cyan-glow));
+}
+
+@keyframes eveHover {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-7px) scale(1.03); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+.character-pair-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* Hal the Cockroach Easter Egg */
+.hal-stage-mascot {
+  position: absolute;
+  right: 18px;
+  bottom: 12px;
+  opacity: 0.85;
+  cursor: pointer;
+  transition: transform 0.2s;
+  z-index: 5;
+}
+
+.hal-stage-mascot:hover {
+  transform: scale(1.3) rotate(12deg);
+  opacity: 1;
+}
+
+/* Cube Wire Straps (Compact Trash Cube Effect) */
+.cube-wire-band {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #5C4830, #A88152, #5C4830);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  opacity: 0.75;
+}
+
+.cube-wire-band.band-top {
+  top: 30%;
+}
+
+.cube-wire-band.band-bottom {
+  bottom: 25%;
+}
+
+.bar-visual {
+  position: relative;
+}
+
+/* EVE Optical Laser Scanning Effect */
+.eve-laser-beam {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(0, 229, 255, 0.35) 0%, rgba(0, 229, 255, 0.05) 100%);
+  border-top: 3px solid #00E5FF;
+  box-shadow: 0 0 14px #00E5FF;
+  animation: eveScanBeam 0.9s infinite alternate ease-in-out;
+  z-index: 4;
+}
+
+@keyframes eveScanBeam {
+  0% { top: 0%; opacity: 0.9; }
+  100% { top: 75%; opacity: 0.25; }
+}
+
+/* Plant Boot Overlay on Pivot & Sorted Elements */
+.cube-plant-overlay {
+  position: absolute;
+  top: -15px;
+  right: -6px;
+  z-index: 6;
+  animation: plantSway 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes plantSway {
+  0% { transform: rotate(-3deg); }
+  100% { transform: rotate(6deg) scale(1.06); }
+}
+
+/* CRT / Axiom Scanline Effect Overlay (Toggled) */
+.app-container.crt-mode::before {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  z-index: 9998;
+  background-size: 100% 3px, 6px 100%;
+  pointer-events: none;
+  opacity: 0.65;
+}
+
+/* Feature Toggle Buttons */
+.btn-feature-toggle {
+  background: var(--chassis-card);
+  border: 1px solid var(--chassis-border-highlight);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+
+.btn-feature-toggle.active {
+  border-color: var(--walle-yellow);
+  color: var(--walle-yellow-bright);
+  background: rgba(245, 158, 11, 0.15);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.3);
+}
+
 /* Pointers Slot */
 .pointer-slot {
-  min-height: 48px;
+  min-height: 90px;
   width: 100%;
   display: flex;
   justify-content: center;

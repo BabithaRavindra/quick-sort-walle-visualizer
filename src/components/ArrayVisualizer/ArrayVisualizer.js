@@ -1,14 +1,19 @@
 /**
- * ArrayVisualizer Component — WALL•E Compactor & EVE Optical Scanner
- * Responsible for rendering:
- * 1. Proportional vertical bars styled as compacted scrap blocks
- * 2. Visual states: Normal, EVE Scan (Compare), Compactor Shift (Swap), Directive (Pivot), Plant in Boot (Sorted)
- * 3. Pointers i (WALL•E Compactor Arm) and j (EVE Optical Sensor) with indicator arrows
- * 4. Partition Regions breakdown: Salvage <= Directive | Unscanned | Salvage > Directive | Directive
+ * ArrayVisualizer Component — WALL•E Compactor Bay & EVE Optical Scanner
+ * Features:
+ * - Animated vector sprites: WALL•E on pointer i, EVE on pointer j, Boot Plant on Pivot/Sorted, Hal on stage
+ * - Compacted scrap cube styling with isometric top rim and wire bindings
+ * - EVE optical laser scanning animation on active comparison
+ * - Compactor hydraulic shift animations
  */
 
 export function renderArrayVisualizer(step, initialArray) {
   if (!step) return '<div class="empty-state">No scrap pile loaded.</div>';
+
+  const walleSvg = (typeof window !== "undefined" && window.WalleTheme) ? window.WalleTheme.WALLE_SPRITE_SVG : "";
+  const eveSvg = (typeof window !== "undefined" && window.WalleTheme) ? window.WalleTheme.EVE_SPRITE_SVG : "";
+  const bootPlantSvg = (typeof window !== "undefined" && window.WalleTheme) ? window.WalleTheme.BOOT_PLANT_SVG : "🌱";
+  const halSvg = (typeof window !== "undefined" && window.WalleTheme) ? window.WalleTheme.HAL_COCKROACH_SVG : "🪳";
 
   const {
     array,
@@ -36,12 +41,14 @@ export function renderArrayVisualizer(step, initialArray) {
 
   const hasActivePartition = low >= 0 && high >= 0 && low < high;
 
-  // Build Partition Region Bar (Section 9 Requirement — WALL-E Themed)
+  // Build Partition Region Bar (Section 9 Requirement)
   let partitionBarHtml = "";
   if (hasActivePartition) {
     partitionBarHtml = `
       <div class="partition-summary-container">
-        <div class="partition-section-label">⚙️ COMPACTOR PARTITION SECTORS (Subarray [${low}..${high}])</div>
+        <div class="partition-section-label">
+          <span>⚙️ COMPACTOR SECTOR PARTITIONING (Subarray [${low}..${high}])</span>
+        </div>
         <div class="partition-bar-grid">
           <div class="region-box region-smaller">
             <div class="region-title">
@@ -53,7 +60,7 @@ export function renderArrayVisualizer(step, initialArray) {
                 : '<span class="chip-empty">None yet</span>'
               }
             </div>
-            <div class="region-subtext">Compactor range: low(${low}) to i(${i})</div>
+            <div class="region-subtext">WALL•E boundary: low(${low}) to i(${i})</div>
           </div>
 
           <div class="region-box region-greater">
@@ -79,12 +86,12 @@ export function renderArrayVisualizer(step, initialArray) {
                 : '<span class="chip-empty">All scanned</span>'
               }
             </div>
-            <div class="region-subtext">EVE scanning j(${j}) to high-1</div>
+            <div class="region-subtext">EVE scanner: j(${j}) to high-1</div>
           </div>
 
           <div class="region-box region-pivot">
             <div class="region-title">
-              <span class="region-dot dot-pivot"></span> Primary Directive (Pivot)
+              <span class="region-dot dot-pivot"></span> Target Directive (Pivot)
             </div>
             <div class="region-chips">
               <span class="chip chip-pivot">★ ${pivotValue !== null ? pivotValue : "None"} (idx ${high})</span>
@@ -96,9 +103,8 @@ export function renderArrayVisualizer(step, initialArray) {
     `;
   }
 
-  // Build Array Element Bars — Compacted Scrap Blocks
+  // Build Array Element Bars — Compacted Scrap Cubes
   const barsHtml = array.map((val, idx) => {
-    // Determine status
     const isSorted = sortedIndices.includes(idx);
     const isPivot = idx === pivotIndex;
     const isComparing = comparingIndices.includes(idx);
@@ -125,7 +131,7 @@ export function renderArrayVisualizer(step, initialArray) {
     }
 
     // Height calculation (min 45px, max 195px)
-    const normalizedHeight = Math.max(40, Math.min(195, Math.round(((val - minVal) / valRange) * 145 + 45)));
+    const normalizedHeight = Math.max(42, Math.min(195, Math.round(((val - minVal) / valRange) * 145 + 45)));
 
     // Pointer badges for this index
     const isPointerI = idx === i;
@@ -134,7 +140,11 @@ export function renderArrayVisualizer(step, initialArray) {
     let pointerHtml = "";
     if (isPointerI && isPointerJ) {
       pointerHtml = `
-        <div class="pointer-wrapper">
+        <div class="pointer-wrapper pointer-double-wrapper">
+          <div class="character-pair-row">
+            <div class="sprite-anchor walle-anchor">${walleSvg}</div>
+            <div class="sprite-anchor eve-anchor">${eveSvg}</div>
+          </div>
           <div class="pointer-arrow double">▲</div>
           <div class="pointer-badge badge-both">WALL•E & EVE = ${idx}</div>
         </div>
@@ -142,6 +152,7 @@ export function renderArrayVisualizer(step, initialArray) {
     } else if (isPointerI) {
       pointerHtml = `
         <div class="pointer-wrapper">
+          <div class="sprite-anchor walle-anchor">${walleSvg}</div>
           <div class="pointer-arrow pointer-arrow-i">▲</div>
           <div class="pointer-badge badge-i">i = ${idx} (WALL•E)</div>
         </div>
@@ -149,17 +160,25 @@ export function renderArrayVisualizer(step, initialArray) {
     } else if (isPointerJ) {
       pointerHtml = `
         <div class="pointer-wrapper">
+          <div class="sprite-anchor eve-anchor">${eveSvg}</div>
           <div class="pointer-arrow pointer-arrow-j">▲</div>
           <div class="pointer-badge badge-j">j = ${idx} (EVE)</div>
         </div>
       `;
     }
 
+    // Boot Plant badge on Pivot or Sorted element
+    const showPlantBadge = isPivot || isSorted;
+
     return `
       <div class="bar-column ${inActiveSubarray ? 'in-subarray' : 'out-subarray'}" data-index="${idx}">
         <div class="bar-card ${stateClass}">
+          ${showPlantBadge ? `<div class="cube-plant-overlay">${bootPlantSvg}</div>` : ''}
+          ${isComparing ? '<div class="eve-laser-beam"></div>' : ''}
           ${stateLabel ? `<div class="bar-badge">${stateLabel}</div>` : '<div class="bar-badge badge-placeholder"></div>'}
           <div class="bar-visual" style="height: ${normalizedHeight}px;">
+            <div class="cube-wire-band band-top"></div>
+            <div class="cube-wire-band band-bottom"></div>
             <span class="bar-value">${val}</span>
           </div>
           <div class="bar-index-tag">
@@ -179,7 +198,7 @@ export function renderArrayVisualizer(step, initialArray) {
     rangeBracketHtml = `
       <div class="range-bracket-info">
         <span class="badge-range-tag">Active Scrap Sector: [Index ${low} → Index ${high}]</span>
-        <span class="badge-pointer-info">i = ${i} (WALL•E boundary ≤ Directive) | j = ${j} (EVE scan) | Directive = ${pivotValue}</span>
+        <span class="badge-pointer-info">i = ${i} (WALL•E boundary ≤ Directive) | j = ${j} (EVE scanner) | Directive = ${pivotValue}</span>
       </div>
     `;
   }
@@ -190,9 +209,10 @@ export function renderArrayVisualizer(step, initialArray) {
     preArrayPointerHtml = `
       <div class="pre-array-pointer">
         <div class="pointer-wrapper">
+          <div class="sprite-anchor walle-anchor">${walleSvg}</div>
           <div class="pointer-arrow pointer-arrow-i">▲</div>
           <div class="pointer-badge badge-i">i = ${i} (low-1)</div>
-          <div class="pointer-desc">Compactor empty (no scrap ≤ Directive yet)</div>
+          <div class="pointer-desc">WALL•E standing by (0 items ≤ Directive)</div>
         </div>
       </div>
     `;
@@ -203,6 +223,8 @@ export function renderArrayVisualizer(step, initialArray) {
       ${partitionBarHtml}
       ${rangeBracketHtml}
       <div class="array-stage-container">
+        <!-- Hal the Cockroach Easter Egg Mascot -->
+        <div class="hal-stage-mascot" title="Hal the Cockroach — WALL•E's best friend!">${halSvg}</div>
         ${preArrayPointerHtml}
         <div class="array-bars-row">
           ${barsHtml}
