@@ -67,6 +67,8 @@ def build_interactive_html(base_dir: str) -> str:
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quick Sort Visualizer - WALL•E Edition</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
   <style>
     {app_css}
     
@@ -106,9 +108,12 @@ def build_interactive_html(base_dir: str) -> str:
 
 
 def main():
+    favicon_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "favicon.png")
+    icon = favicon_path if os.path.exists(favicon_path) else "⚡"
+
     st.set_page_config(
-        page_title="Quick Sort Visualizer | DAA CIA 3(B)",
-        page_icon="⚡",
+        page_title="Quick Sort Visualizer | WALL•E Edition",
+        page_icon=icon,
         layout="wide",
         initial_sidebar_state="collapsed"
     )

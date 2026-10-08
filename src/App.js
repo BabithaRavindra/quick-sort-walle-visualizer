@@ -244,6 +244,9 @@
   // --- Subcomponents ---
 
   function Header({ onOpenLearning }) {
+    const avatarSrc =
+      (global.WalleTheme && global.WalleTheme.WALLE_MAIN_AVATAR_DATA_URI) || "assets/walle-avatar.png";
+
     return h(
       "header",
       { className: "app-header" },
@@ -252,24 +255,44 @@
         { className: "header-top-row" },
         h(
           "div",
-          null,
+          { className: "header-brand-container" },
           h(
-            "h1",
-            { className: "header-main-title" },
-            h("span", { className: "walle-eyes-badge" }, "👁️👁️ WALL•E"),
-            "QUICK SORT VISUALIZER",
-            h("span", { className: "bnl-corp-badge" }, "BnL"),
-            h("span", { className: "header-badge-daa" }, "DAA CIA 3(B)")
+            "div",
+            {
+              className: "main-walle-icon-wrapper",
+              title: "WALL•E Unit #07 — Click for Diagnostic Sound",
+              onClick: () => {
+                const sm = global.WalleTheme && global.WalleTheme.soundManager;
+                if (sm) sm.playCompletionChime();
+              },
+            },
+            h("img", {
+              src: avatarSrc,
+              alt: "WALL•E Main Character Icon",
+              className: "main-walle-icon-img",
+            }),
+            h("span", { className: "walle-icon-pulse-glow" })
           ),
           h(
-            "h2",
-            { className: "header-subtitle" },
-            "Waste Allocation Load Lifter • Earth-Class — Interactive Lomuto Partition Simulator"
-          ),
-          h(
-            "p",
-            { className: "header-desc" },
-            "Explore how Quick Sort partitions scrap elements around a pivot directive, comparing with EVE's optical scanner, and compacting into clean sorted cubes via recursive divide-and-conquer."
+            "div",
+            { className: "header-title-block" },
+            h(
+              "h1",
+              { className: "header-main-title" },
+              "QUICK SORT VISUALIZER",
+              h("span", { className: "bnl-corp-badge" }, "BnL"),
+              h("span", { className: "header-badge-daa" }, "DAA CIA 3(B)")
+            ),
+            h(
+              "h2",
+              { className: "header-subtitle" },
+              "Waste Allocation Load Lifter • Earth-Class — Interactive Lomuto Partition Simulator"
+            ),
+            h(
+              "p",
+              { className: "header-desc" },
+              "Explore how Quick Sort partitions scrap elements around a pivot directive, comparing with EVE's optical scanner, and compacting into clean sorted cubes via recursive divide-and-conquer."
+            )
           )
         ),
         h(
@@ -557,11 +580,22 @@
 
   function CompletionBanner({ step, totalSteps }) {
     if (!step) return null;
+    const avatarSrc =
+      (global.WalleTheme && global.WalleTheme.WALLE_MAIN_AVATAR_DATA_URI) || "assets/walle-avatar.png";
+
     return h(
       "div",
       { className: "completion-banner" },
-      h("div", { className: "completion-icon" }, "🌱"),
-      h("h2", { className: "completion-title" }, "DIRECTIVE ACCOMPLISHED! ALL CUBES SORTED!"),
+      h(
+        "div",
+        { className: "completion-header-row" },
+        h("img", {
+          src: avatarSrc,
+          alt: "WALL•E Victory",
+          className: "completion-avatar-img",
+        }),
+        h("h2", { className: "completion-title" }, "DIRECTIVE ACCOMPLISHED! ALL CUBES SORTED!")
+      ),
       h(
         "div",
         { className: "completion-array-display" },
