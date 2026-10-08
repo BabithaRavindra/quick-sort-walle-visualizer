@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "name": "quick-sort-simulator-walle",
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
