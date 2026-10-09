@@ -1,0 +1,11 @@
+# Exclude Python files from Vercel deployment so it deploys as a pure static web app
+*.py
+**/*.py
+requirements.txt
+Dockerfile
+cloudbuild.yaml
+tests/
+__pycache__/
+*.pyc
+.gitignore
+.dockerignore

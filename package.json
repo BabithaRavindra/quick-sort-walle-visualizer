@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "WALL-E themed Quick Sort Simulator for DAA CIA 3(B)",
   "main": "index.html",
-  "scripts": {
-    "start": "python app.py"
-  },
   "keywords": [
     "quicksort",
     "lomuto-partition",
